@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { API_URL, BASE_URL } from '../constants';
 
 const Auth: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -16,23 +17,18 @@ const Auth: React.FC = () => {
     setError('');
 
     try {
-      const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
-      const payload = isLogin ? { email, password } : { email, password, role: 'EMPLOYEE' };
+      const endpoint = `${API_URL}/auth/login`;
+      const payload = { email, password };
       
-      const res = await axios.post(`http://localhost:5000${endpoint}`, payload);
+      const res = await axios.post(endpoint, payload);
       
-      if (isLogin) {
-        sessionStorage.setItem('token', res.data.token);
-        sessionStorage.setItem('role', res.data.role);
-        
-        if (res.data.role === 'ADMIN') {
-          navigate('/admin');
-        } else {
-          navigate('/employee');
-        }
+      sessionStorage.setItem('token', res.data.token);
+      sessionStorage.setItem('role', res.data.role);
+      
+      if (res.data.role === 'ADMIN') {
+        navigate('/admin');
       } else {
-        setIsLogin(true); // switch to login after successful register
-        toast.success('Registered successfully. Please login.');
+        navigate('/employee');
       }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Something went wrong');
@@ -48,10 +44,10 @@ const Auth: React.FC = () => {
       >
         <div className="mb-10 text-center">
           <h2 className="text-4xl font-display font-black text-primary dark:text-white tracking-tighter mb-2">
-            {isLogin ? 'Welcome Back' : 'Create Account'}
+            Welcome Back
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 font-medium italic">
-            {isLogin ? 'Login to access your dashboard' : 'Join Ridge Educational Services'}
+            Login to access your dashboard
           </p>
         </div>
 
@@ -88,18 +84,9 @@ const Auth: React.FC = () => {
             type="submit"
             className="w-full bg-primary text-white font-black py-5 rounded-3xl shadow-2xl shadow-primary/30 transition-all text-sm uppercase tracking-[0.2em] mt-8"
           >
-            {isLogin ? 'Login' : 'Sign Up'}
+            Login
           </motion.button>
         </form>
-
-        <div className="mt-8 text-center">
-          <button
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-xs font-bold text-slate-400 hover:text-accent transition-colors"
-          >
-            {isLogin ? "Don't have an account? Sign up" : "Already have an account? Login"}
-          </button>
-        </div>
       </motion.div>
     </div>
   );

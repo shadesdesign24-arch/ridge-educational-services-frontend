@@ -3,8 +3,9 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { API_URL, BASE_URL } from '../constants';
 
-const API = 'http://localhost:5000/api/admin';
+const API = `${API_URL}/admin`;
 
 interface CutoffRow {
   courseName: string;
@@ -31,6 +32,7 @@ const AdminPanel: React.FC = () => {
   const [admissionFee, setAdmissionFee] = useState('');
   const [healthCardFee, setHealthCardFee] = useState('');
   const [applicationFee, setApplicationFee] = useState('');
+  const [collegeLogo, setCollegeLogo] = useState<File | null>(null);
   const [showAddCollegeForm, setShowAddCollegeForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCollegeId, setSelectedCollegeId] = useState<number | null>(null);
@@ -84,22 +86,30 @@ const AdminPanel: React.FC = () => {
   const handleAddCollege = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post(`${API}/college`, {
-        name: collegeName,
-        location: collegeLocation,
-        description: collegeDescription,
-        website: collegeWebsite,
-        cutoffs: cutoffRows.filter(c => c.courseName && c.minimumCutoff),
-        yearWiseFees: yearWiseFees.filter(y => y.amount),
-        admissionFee,
-        healthCardFee,
-        applicationFee
-      }, { headers });
+      const formData = new FormData();
+      formData.append('name', collegeName);
+      formData.append('location', collegeLocation);
+      formData.append('description', collegeDescription);
+      formData.append('website', collegeWebsite);
+      formData.append('cutoffs', JSON.stringify(cutoffRows.filter(c => c.courseName && c.minimumCutoff)));
+      formData.append('yearWiseFees', JSON.stringify(yearWiseFees.filter(y => y.amount)));
+      formData.append('admissionFee', admissionFee);
+      formData.append('healthCardFee', healthCardFee);
+      formData.append('applicationFee', applicationFee);
+      if (collegeLogo) formData.append('logo', collegeLogo);
+
+      await axios.post(`${API}/college`, formData, {
+        headers: { 
+          ...headers,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
       toast.success('College added successfully!');
       setCollegeName(''); setCollegeLocation(''); setCollegeDescription(''); setCollegeWebsite('');
       setCutoffRows([{ courseName: '', category: 'General', minimumCutoff: '' }]);
       setYearWiseFees([{year: 1, amount: ''}]);
       setAdmissionFee(''); setHealthCardFee(''); setApplicationFee('');
+      setCollegeLogo(null);
       setShowAddCollegeForm(false);
       fetchColleges();
     } catch (err: any) {
@@ -250,7 +260,7 @@ const AdminPanel: React.FC = () => {
   const handleManualAddConsultation = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/consultation', {
+      await axios.post(`${API_URL}/consultation`, {
         name: newConsultName,
         email: newConsultEmail,
         phone: newConsultPhone,
@@ -388,6 +398,11 @@ const AdminPanel: React.FC = () => {
                             <input value={collegeWebsite} onChange={e => setCollegeWebsite(e.target.value)}
                               className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl py-4 px-6 dark:text-white font-bold text-sm" placeholder="https://www.annauniv.edu" />
                           </div>
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">College Logo (Image)</label>
+                            <input type="file" accept="image/*" onChange={e => setCollegeLogo(e.target.files ? e.target.files[0] : null)}
+                              className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl py-4 px-6 dark:text-white font-bold text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-primary file:text-white hover:file:bg-primary/90" />
+                          </div>
                         </div>
 
                         {/* Cutoff Marks Section */}
@@ -499,11 +514,20 @@ const AdminPanel: React.FC = () => {
                           <>
                             {/* College Header */}
                             <div className="flex justify-between items-start mb-10">
-                              <div>
-                                <h3 className="font-display font-black text-3xl dark:text-white leading-tight">{col.name}</h3>
-                                <p className="text-xs text-accent uppercase tracking-[0.3em] font-black mt-2">{col.location}</p>
-                                {col.description && <p className="text-sm text-slate-500 dark:text-slate-400 mt-4 max-w-2xl leading-relaxed">{col.description}</p>}
-                                {col.website && <a href={col.website} target="_blank" rel="noreferrer" className="text-sm font-bold text-blue-500 hover:text-blue-600 hover:underline mt-4 inline-flex items-center gap-2"><span className="material-icons text-sm">language</span> {col.website}</a>}
+                              <div className="flex gap-6 items-start">
+                                {col.logo && (
+                                  <img 
+                                    src={`${BASE_URL}${col.logo}`} 
+                                    alt="Logo" 
+                                    className="w-24 h-24 object-contain rounded-2xl bg-slate-50 dark:bg-slate-800 p-2 border border-slate-100 dark:border-slate-800 flex-shrink-0"
+                                  />
+                                )}
+                                <div>
+                                  <h3 className="font-display font-black text-3xl dark:text-white leading-tight">{col.name}</h3>
+                                  <p className="text-xs text-accent uppercase tracking-[0.3em] font-black mt-2">{col.location}</p>
+                                  {col.description && <p className="text-sm text-slate-500 dark:text-slate-400 mt-4 max-w-2xl leading-relaxed">{col.description}</p>}
+                                  {col.website && <a href={col.website} target="_blank" rel="noreferrer" className="text-sm font-bold text-blue-500 hover:text-blue-600 hover:underline mt-4 inline-flex items-center gap-2"><span className="material-icons text-sm">language</span> {col.website}</a>}
+                                </div>
                               </div>
                               <div className="flex gap-2 flex-shrink-0">
                                 <button onClick={() => { setAddCutoffCollegeId(addCutoffCollegeId === col.id ? null : col.id); }} 

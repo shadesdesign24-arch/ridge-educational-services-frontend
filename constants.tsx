@@ -72,6 +72,8 @@ export const PARTNERS: PartnerLogo[] = [
   },
 ];
 
+export const BASE_URL = 'https://ridgeeducationalservices.com'; // Change to http://ridgeeducationalservices.com in production
+export const API_URL = `${BASE_URL}/ridge-backend`;
 export const LOGO_URL = logoUrl;
 export const LOGO_NIGHT_URL = logoNightUrl;
 export const HERO_IMG = successHeroUrl;

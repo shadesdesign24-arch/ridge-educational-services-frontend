@@ -3,6 +3,7 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { API_URL, BASE_URL } from '../constants';
 
 const EmployeePanel: React.FC = () => {
   const navigate = useNavigate();
@@ -27,14 +28,14 @@ const EmployeePanel: React.FC = () => {
 
   const fetchConsultations = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/employee/consultations', { headers });
+      const res = await axios.get(`${API_URL}/employee/consultations`, { headers });
       setConsultations(res.data);
     } catch (err) { console.error(err); }
   };
 
   const updateConsultationStatus = async (id: number, status: string) => {
     try {
-      await axios.put(`http://localhost:5000/api/employee/consultations/${id}/status`, { status }, { headers });
+      await axios.put(`${API_URL}/employee/consultations/${id}/status`, { status }, { headers });
       toast.success('Status updated');
       fetchConsultations();
     } catch (err) { toast.error('Error updating status'); }
@@ -43,7 +44,7 @@ const EmployeePanel: React.FC = () => {
   const checkEligibility = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/employee/check-eligibility', {
+      const res = await axios.post(`${API_URL}/employee/check-eligibility`, {
         courseName,
         category,
         studentCutoffMarks: parseFloat(marks)
@@ -61,7 +62,7 @@ const EmployeePanel: React.FC = () => {
   const handleBook = async (collegeId: number) => {
     if (!studentName) return toast.error('Please enter student name above.');
     try {
-      await axios.post('http://localhost:5000/api/employee/book', {
+      await axios.post(`${API_URL}/employee/book`, {
         collegeId,
         studentName,
       }, {
@@ -77,7 +78,7 @@ const EmployeePanel: React.FC = () => {
     e.preventDefault();
     if (!studentName || !studentPhone) return toast.error('Enter student details');
     try {
-      await axios.post('http://localhost:5000/api/employee/follow-up', {
+      await axios.post(`${API_URL}/employee/follow-up`, {
         studentName,
         studentPhone,
         notes: `Interested in ${courseName}. Cutoff marks: ${marks}`,
@@ -188,9 +189,18 @@ const EmployeePanel: React.FC = () => {
                 eligibleColleges.map((match, i) => (
                   <motion.div key={i} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }} className="p-8 rounded-[1.5rem] border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 hover:border-accent transition-colors group">
                     <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="font-display font-black text-2xl dark:text-white mb-1 group-hover:text-accent transition-colors">{match.college.name}</h3>
-                        <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">{match.college.location}</p>
+                      <div className="flex gap-4 items-start">
+                        {match.college.logo && (
+                          <img 
+                            src={`${BASE_URL}${match.college.logo}`} 
+                            alt="Logo" 
+                            className="w-14 h-14 object-contain rounded-xl bg-white dark:bg-slate-900 p-1 border border-slate-200 dark:border-slate-800"
+                          />
+                        )}
+                        <div>
+                          <h3 className="font-display font-black text-2xl dark:text-white mb-1 group-hover:text-accent transition-colors">{match.college.name}</h3>
+                          <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">{match.college.location}</p>
+                        </div>
                       </div>
                       <div className="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest">
                         Match

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { motion, AnimatePresence, useScroll, useSpring, useInView, animate, useTransform } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFacebook, faWhatsapp, faInstagram, faLinkedin } from '@fortawesome/free-brands-svg-icons';
-import { NAV_ITEMS, LOGO_URL, LOGO_NIGHT_URL, HERO_IMG, AWARD_IMG, SERVICES, PARTNERS } from './constants';
+import { NAV_ITEMS, LOGO_URL, LOGO_NIGHT_URL, HERO_IMG, AWARD_IMG, SERVICES, PARTNERS, API_URL } from './constants';
 import Partners from './Partners';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -157,7 +157,7 @@ const App: React.FC = () => {
     e.preventDefault();
     setConsultFormSubmitting(true);
     try {
-      await axios.post('http://localhost:5000/api/consultation', {
+      await axios.post(`${API_URL}/consultation`, {
         name: consultFormName,
         phone: consultFormPhone,
         email: consultFormEmail,
@@ -613,8 +613,8 @@ const App: React.FC = () => {
               <div className="space-y-8">
                 <h6 className="text-sm font-black text-accent uppercase tracking-[0.3em]">Quick Contact</h6>
                 <ul className="space-y-6 text-slate-500 font-bold">
-                  <li className="flex gap-4"><span className="material-icons text-accent">email</span> info@ridgeedu.com</li>
-                  <li className="flex gap-4"><span className="material-icons text-accent">call</span> +91 999 000 1122</li>
+                  <li className="flex gap-4"><span className="material-icons text-accent">email</span> ridgeeducationalservices@gmail.com</li>
+                  <li className="flex gap-4"><span className="material-icons text-accent">call</span> +91 7871000006</li>
                 </ul>
               </div>
             </div>
