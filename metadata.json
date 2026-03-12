@@ -1,0 +1,8 @@
+{
+  "name": "Ridge Educational Services",
+  "description": "A premium educational consultancy web application for college admissions guidance, featuring academic planning, admission assistance, and specialized student support.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
